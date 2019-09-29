@@ -1,5 +1,5 @@
 C
-C                            c f m a i n . c p p
+C                            c f m a i n . f
 C
 C  Summary:
 C     2D array access test main routine in Fortran.
