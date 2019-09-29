@@ -41,6 +41,10 @@
 #
 #  History:
 #     28th Aug 2019. First properly commented version. KS.
+#     14th Sep 2019. Added PCL and Rust tests, and two more Python tests.
+#                    All tests now have a single baseline run with one
+#                    repeat to try to allow for startup and checking
+#                    overheads. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -175,6 +179,11 @@ def BuildAndTimeProgram (
 
    Status = None
    Secs = 0.0
+   
+   #  We need at least two repeats, or we can't subtract off the overheads
+   #  associated with starting the test and checking the results.
+   
+   if (Nrpt < 2) : Nrpt = 2
 
    #  We run through the varius stages of the process, the build stage(s)
    #  and then the execution of the test program. If there is a failure, we
@@ -207,15 +216,16 @@ def BuildAndTimeProgram (
       #  code being tested is quite slow, and this means the time to setup and
       #  check the results may be a significant fraction of the measured time.
       #  In this case, do one run with Nrpt set to 1, and allow for the time
-      #  this takes to adjust the measured value of Secs.
+      #  this takes to adjust the measured value of Secs. In fact, we might
+      #  as well do this for all cases - the faster PDL tests, for example,
+      #  still have very slow checking code.
 
-      if (Nrpt < 10) :
-         Command = "%s %d %d %d" % (ExecCommand,1,Nx,Ny)
-         Start = datetime.datetime.now()
-         (Status,Output,Errors) = ExecuteCommand(Command)
-         End = datetime.datetime.now()
-         Elapsed = End - Start
-         Secs = (Secs - Elapsed.total_seconds()) * float(Nrpt) / float(Nrpt - 1)
+      Command = "%s %d %d %d" % (ExecCommand,1,Nx,Ny)
+      Start = datetime.datetime.now()
+      (Status,Output,Errors) = ExecuteCommand(Command)
+      End = datetime.datetime.now()
+      Elapsed = End - Start
+      Secs = (Secs - Elapsed.total_seconds()) * float(Nrpt) / float(Nrpt - 1)
 
    #  If a cleanup command is supplied, we run it no matter what, but only
    #  report its errors if everything else has gone fine so far.
@@ -275,7 +285,8 @@ def ListVersion (Lang,Command) :
 #
 #  Note: Neither of the descriptions should contain commas, as they are written
 #  out using a CSV (comma separated variable) format, and having commas in the
-#  items confuses things.
+#  items confuses things. Note that the number of repetitions must be more than
+#  one.
 
 RawCclang = [
    "C : raw",
@@ -709,6 +720,114 @@ CNumRgccO3native = [
    5000000,
    "rm -f cnrmain cnrsub.o"]
 
+VecCclang = [
+   "C : vectors",
+   "clang",
+   "c++ -c cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain cvmain.cpp cvsub.o",
+   "./cvmain",
+   100000,
+   "rm -f cvmain cvsub.o"]
+
+VecCclangO = [
+   "C : vectors",
+   "clang -O",
+   "c++ -c -O cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain -O cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCclangO1 = [
+   "C : vectors",
+   "clang -O1",
+   "c++ -c -O1 cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain -O1 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCclangO2 = [
+   "C : vectors",
+   "clang -O2",
+   "c++ -c -O2 cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain -O2 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCclangO3 = [
+   "C : vectors",
+   "clang -O3",
+   "c++ -c -O3 cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain -O3 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCclangO3native = [
+   "C : vectors",
+   "clang -O3 native",
+   "c++ -c -O3 -march=native cvsub.cpp -o cvsub.o",
+   "c++ -o cvmain -O3 -march=native cvmain.cpp cvsub.o",
+   "./cvmain",
+   5000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgcc = [
+   "C : vectors",
+   "g++",
+   "g++ -c cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain cvmain.cpp cvsub.o",
+   "./cvmain",
+   100000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgccO = [
+   "C : vectors",
+   "g++ -O",
+   "g++ -c -O cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain -O cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgccO1 = [
+   "C : vectors",
+   "g++ -O1",
+   "g++ -c -O1 cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain -O1 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgccO2 = [
+   "C : vectors",
+   "g++ -O2",
+   "g++ -c -O2 cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain -O2 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgccO3 = [
+   "C : vectors",
+   "g++ -O3",
+   "g++ -c -O3 cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain -O3 cvmain.cpp cvsub.o",
+   "./cvmain",
+   1000000,
+   "rm -f cvmain cvsub.o"]
+
+VecCgccO3native = [
+   "C : vectors",
+   "g++ -O3 native",
+   "g++ -c -O3 -march=native cvsub.cpp -o cvsub.o",
+   "g++ -o cvmain -O3 -march=native cvmain.cpp cvsub.o",
+   "./cvmain",
+   5000000,
+   "rm -f cvmain cvsub.o"]
+
 Fortran = [
    "Fortran",
    "gfortran",
@@ -862,12 +981,57 @@ Router = [
    20000,
    ""]
 
+Perl = [
+   "Perl",
+   "Perl",
+   "",
+   "",
+   "perl csubraw.pl",
+   1000,
+   ""]
+
+PerlPDLraw = [
+   "Perl/PDL : raw",
+   "Perl/PDL",
+   "",
+   "",
+   "perl csubpdl.pl",
+   10,
+   ""]
+
+PerlPDLvec = [
+   "Perl/PDL : vectors",
+   "Perl/PDL",
+   "",
+   "",
+   "perl csubpdlvec.pl",
+   30000,
+   ""]
+
+PerlPDLary = [
+   "Perl/PDL : arrays",
+   "Perl/PDL",
+   "",
+   "",
+   "perl csubpdlary.pl",
+   100000,
+   ""]
+
 Python2 = [
-   "Python : raw",
+   "Python : lists",
    "Python2",
    "",
    "",
-   "python csub.py",
+   "python csubraw.py",
+   1000,
+   ""]
+
+Python2np = [
+   "Python : numpy raw",
+   "Python2",
+   "",
+   "",
+   "python csubnp.py",
    200,
    ""]
 
@@ -876,16 +1040,34 @@ Python2vec = [
    "Python2",
    "",
    "",
-   "python csubnp.py",
+   "python csubnpv.py",
+   50000,
+   ""]
+
+Python2ary = [
+   "Python : arrays",
+   "Python2",
+   "",
+   "",
+   "python csubnpna.py",
    50000,
    ""]
 
 Python3 = [
-   "Python : raw",
+   "Python : lists",
    "Python3",
    "",
    "",
-   "python3 csub.py",
+   "python3 csubraw.py",
+   1000,
+   ""]
+
+Python3np = [
+   "Python : numpy raw",
+   "Python3",
+   "",
+   "",
+   "python3 csubnp.py",
    200,
    ""]
 
@@ -894,9 +1076,54 @@ Python3vec = [
    "Python3",
    "",
    "",
-   "python3 csubnp.py",
+   "python3 csubnpv.py",
    50000,
    ""]
+
+Python3ary = [
+   "Python : arrays",
+   "Python3",
+   "",
+   "",
+   "python3 csubnpna.py",
+   50000,
+   ""]
+
+Rust = [
+   "Rust",
+   "Rustc",
+   "rustc crsmain.rs ",
+   "",
+   "./crsmain",
+   1000,
+   "rm -f crsmain"]
+
+RustO = [
+   "Rust",
+   "Rustc -O",
+   "rustc -O crsmain.rs ",
+   "",
+   "./crsmain",
+   100000,
+   "rm -f crsmain"]
+
+RustO3 = [
+   "Rust",
+   "Rustc -O3",
+   "rustc -C opt-level=3 crsmain.rs ",
+   "",
+   "./crsmain",
+   100000,
+   "rm -f crsmain"]
+
+RustO3native = [
+   "Rust",
+   "Rustc -O3 native",
+   "rustc -C target-cpu=native -C opt-level=3 crsmain.rs ",
+   "",
+   "./crsmain",
+   100000,
+   "rm -f crsmain"]
 
 Javascript = [
    "Javascript",
@@ -940,7 +1167,7 @@ SwiftO = [
    "xcrun swiftc -o cstest -O cstest.swift",
    "",
    "./cstest",
-   500000,
+   300000,
    "rm -f cstest"]
 
 SwiftOunchecked = [
@@ -949,7 +1176,7 @@ SwiftOunchecked = [
    "xcrun swiftc -o cstest -Ounchecked cstest.swift",
    "",
    "./cstest",
-   1000000,
+   500000,
    "rm -f cstest"]
 
 #  FullTests is simply a list of all the structures that define tests to
@@ -960,13 +1187,18 @@ FullTests = [
    Assembler,
    Fortran,FortranO,FortranO1,FortranO2,FortranO3,FortranO3native,
    RawR, Rref, Router,
-   Python2,Python2vec,Python3,Python3vec,
+   Perl,PerlPDLraw,PerlPDLvec,PerlPDLary,
+   Python2,Python2np,Python2vec,Python2ary,
+   Python3,Python3np,Python3vec,Python3ary,
+   Rust,RustO,RustO3,RustO3native,
    Java,
    Tcl,
    Julia,JuliaO0,JuliaO1,JuliaO2,JuliaO3,
    Javascript,JavascriptNoopt,
    RawCclang,RawCclangO,RawCclangO1,RawCclangO2,RawCclangO3,RawCclangO3native,
    RawCgcc,RawCgccO,RawCgccO1,RawCgccO2,RawCgccO3,RawCgccO3native,
+   VecCclang,VecCclangO,VecCclangO1,VecCclangO2,VecCclangO3,VecCclangO3native,
+   VecCgcc,VecCgccO,VecCgccO1,VecCgccO2,VecCgccO3,VecCgccO3native,
    BoostCclang,BoostCclangO,BoostCclangO1,
    BoostCclangO2,BoostCclangO3,BoostCclangO3native,
    BoostCgcc,BoostCgccO,BoostCgccO1,BoostCgccO2,BoostCgccO3,BoostCgccO3native,
@@ -989,18 +1221,21 @@ FullTests = [
 print ("")
 print ("Versions:")
 print ("")
-ListVersion("Clang","c++ --version")
+ListVersion("Clang    ","c++ --version")
 ListVersion("Assembler","c++ --version")
-ListVersion("Gcc","g++ --version")
-ListVersion("Gfortran","gfortran --version")
-ListVersion("R","Rscript --version")
-ListVersion("Python2","python --version")
-ListVersion("Python3","python3 --version")
-ListVersion("Java","java -version")
-ListVersion("Node.js","node --version")
-ListVersion("Tcl","tclsh ver.tcl")
-ListVersion("Swift","xcrun swiftc --version")
-ListVersion("Julia","julia --version")
+ListVersion("Gcc      ","g++ --version")
+ListVersion("Gfortran ","gfortran --version")
+ListVersion("R        ","Rscript --version")
+ListVersion("Python2  ","python --version")
+ListVersion("Python3  ","python3 --version")
+ListVersion("Java     ","java -version")
+ListVersion("Node.js  ","node --version")
+ListVersion("Tcl      ","tclsh ver.tcl")
+ListVersion("Swift    ","xcrun swiftc --version")
+ListVersion("Julia    ","julia --version")
+ListVersion("Rust     ","rustc --version")
+ListVersion("Perl/PDL ","pdl -V")
+
 
 #  Set the size of the array to be used for the test. There isn't much of a
 #  good reason for using 10 rows of 2000 elements, but the repeat counts
@@ -1134,7 +1369,7 @@ for Test in FullTests :
    CompOptIndex = CompOptList.index(CompOpt)
    KIterSecs = Results[LangTechIndex,CompOptIndex]
    RelativeSpeed = KIterSecs / BenchKIterSecs
-   print ("%24s %20s 1K Iter: %10.2g, Relative speed %.2f" %
+   print ("%24s %20s 1K Iter: %10.2g, Relative time %12.2f" %
                                 (LangTech,CompOpt,KIterSecs,RelativeSpeed))
 
 #  Finally, output the summary table of relative speeds in a .csv format that

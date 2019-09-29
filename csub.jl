@@ -25,8 +25,8 @@
 #     array handling, and the implementation here is pretty straightforward.
 #
 #  Structure:
-#     Most test progrsms in this study code the basic array manipulation in a
-#     single subrutine, then create the original input array, and pass that,
+#     Most test programs in this study code the basic array manipulation in a
+#     single subroutine, then create the original input array, and pass that,
 #     together with the dimensions of the array, to that subroutine, repeating
 #     that call a large number of times in oder to be able to get a reasonable
 #     estimate of the time taken. Then the final result is checked against the

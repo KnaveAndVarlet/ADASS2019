@@ -100,11 +100,11 @@ import Foundation
 //  indices. The intent is to try to see how well any given language handles
 //  access to individual elements of a 2D array,
 
-func Subr (Input: Array<Array<Int>>, Nx: Int, Ny : Int,
-                                    Output: inout Array<Array<Int>>) {
+func Subr (Input: Array<Array<Float>>, Nx: Int, Ny : Int,
+                         Output: inout Array<Array<Float>>) {
    for Iy in 0...Ny-1 {
       for Ix in 0...Nx-1 {
-         Output[Iy][Ix] = Input[Iy][Ix] + (Ix + Iy)
+         Output[Iy][Ix] = Input[Iy][Ix] + Float(Ix + Iy)
       }
    }
 }
@@ -141,12 +141,12 @@ print("Arrays: \(Ny) rows of \(Nx) columns, repeats = \(Nrpt)")
 //  descending order. The output array is just set to zeros, although that
 //  doesn't matter at all.
 
-var array = Array(repeating:Array(repeating:Int(), count:Nx), count:Ny)
-var output = Array(repeating:Array(repeating:Int(), count:Nx), count:Ny)
+var array = Array(repeating:Array(repeating:Float(), count:Nx), count:Ny)
+var output = Array(repeating:Array(repeating:Float(), count:Nx), count:Ny)
 
 for Iy in 0...Ny-1 {
   for Ix in 0...Nx-1 {
-      array[Iy][Ix] = (Nx - Ix + Ny - Iy)
+      array[Iy][Ix] = Float(Nx - Ix + Ny - Iy)
   }
 }
 
@@ -161,7 +161,7 @@ for _ in 0...Nrpt-1 {
 check:
 for Iy in 0...Ny-1 {
    for Ix in 0...Nx-1 {
-      let Expected = array[Iy][Ix] + (Ix + Iy)
+      let Expected = array[Iy][Ix] + Float(Ix + Iy)
       if (output[Iy][Ix] != Expected) {
           print("""
            Error at \(Ix),\(Iy) Got \(output[Iy][Ix]) expected \(Expected)

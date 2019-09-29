@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-#                              c s u b n p . p y
+#                              c s u b n p n a . p y
 #
 #  Summary:
-#     2D array access test in Python, using simple numpy array element access.
+#     2D array access test in Python, using a single numpy vector operation.
 #
 #  Introduction:
 #     This is a test program written as part of a study into how well different
@@ -21,14 +21,16 @@
 #     study), but it does produce some interesting results.
 #
 #  This version:
-#     This version is for Python, and is a relatively straightforward
-#     implementation, accessing the individual elements of a numpy array
-#     directly using the standard (but fairly inefficient) array[iy,ix] syntax
-#     that numpy supports. This code can be run under Python3 or any version
-#     of Python2 that supports the 'from __future__ import' line at the start
-#     of the code. Note that this is not really how you should be using numpy,
-#     which is designed to provide efficient operations on arrays and vectors,
-#     not on individual array elements.
+#     This version is for Python, and is not really a test of how well Python
+#     handles access to individual elements of an array, but it is an example
+#     of how a Python program can be made more efficient through an imaginative
+#     use of the numpy vector facilities. The code achieves the same results as
+#     the much slower but simpler and more straightforward code used in the
+#     csub.py example program, and can be faster than the line by line vector
+#     code in csubnp.py. It works by setting up the full set of index values
+#     to be added and adding them to the input array in one efficient line of
+#     code. This code can be run under Python3 or any version of Python2 that
+#     supports the 'from __future__ import' line at the start of the code.
 #
 #  Structure:
 #     Most test programs in this study code the basic array manipulation in a
@@ -39,7 +41,7 @@
 #     expected result.
 #
 #     This code follows that structure, with both the main routine and the
-#     called subroutine in the same piece of code, as Python doesn't optimise
+#     called subroutine in the same piece of code, as {ython doesn't optimise
 #     out the call in that case.
 #
 #  Invocation:
@@ -51,7 +53,7 @@
 #     python3 csubnp.py irpt nx ny
 #
 #     where
-#        irpt  is the number of times the subroutine is called - default 100.
+#        irpt  is the number of times the subroutine is called - default 100000.
 #        nx    is the number of columns in the array tested - default 2000.
 #        ny    is the number of rows in the array tested - default 10.
 #
@@ -61,7 +63,8 @@
 #  Author(s): Keith Shortridge, Keith@KnaveAndVarlet.com.au
 #
 #  History:
-#     20th Aug 2019. First properly commented version. KS.
+#     14th Sep 2019. Based on the code in csubnp....py, modified to use the
+#                    single line of code suggested by Karl Glazebrook. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -87,7 +90,6 @@
 #  just the use of print() as a function call) when Python2 is being used.
 
 from __future__ import (print_function,division,absolute_import)
-
 import numpy
 import sys
 
@@ -98,25 +100,64 @@ import sys
 #  subr is a subroutine that is passed a two-dimensional floating point array
 #  ina, with dimensions nx by ny, together with a second, output array, out,
 #  of the same dimensions. It returns with each element of out set to the
-#  contents of the corresponding element if ina plus the sum of its two indices.
+#  contents of the corresponding element of ina plus the sum of its two indices.
 #  The intent is to try to see how well any given language handles access to
 #  individual elements of a 2D array,
 
+#  This version of subr() does the same as
+#
+#  def subr(ina,nx,ny,out):
+#     for iy in range(ny):
+#        for ix in range(nx):
+#           out[iy,ix] = ina[iy,ix] + ix + iy
+#  but uses numpy vector operations to perform the whole opweration in one line
+#  and is much faster.
+#
+#  This code is neat, but how it works is not obvious to people not used to
+#  numpy's more esoteric features. arange(n) creates an array of values 0..n-1,
+#  rather like range, but as an array. The [numpy.newaxis,:] syntax adds an
+#  axis to this, creating an array with 1 row and n columns, while
+#  [:,numpy.newaxis] would create an array with n rows of 1 column each.
+#  For example:
+#  >>> numpy.arange(5)
+#  array([0, 1, 2, 3, 4])
+#  >>> numpy.arange(5)[numpy.newaxis,:]
+#  array([[0, 1, 2, 3, 4]])
+#  >>> numpy.arange(4)[:,numpy.newaxis]
+#  array([[0],
+#         [1],
+#         [2],
+#         [3]])
+#  and if these two arrays are added, they are first expanded ('broadcast') so
+#  their dimensions match by replicating the missing columns or rows from the
+#  existing base column or row. The result is:
+#  >>> numpy.arange(5)[numpy.newaxis,:] + numpy.arange(4)[:,numpy.newaxis]
+#  array([[0, 1, 2, 3, 4],
+#         [1, 2, 3, 4, 5],
+#         [2, 3, 4, 5, 6],
+#         [3, 4, 5, 6, 7]])
+#  And these are just the sums of the index values as required to be added
+#  to the input array to create the necessary output array values. All in
+#  one line. Easier done than explained...
+
+from numpy import newaxis as NA  # Abbrevation for the special newaxis function
+
 def subr(ina,nx,ny,out):
-   for iy in range(ny):
-      for ix in range(nx):
-         out[iy,ix] = ina[iy,ix] + ix + iy
+   out[:] = ina + numpy.arange(nx)[NA,:] + numpy.arange(ny)[:,NA]
 
 #  -----------------------------------------------------------------------------
 
-#  The main routine.
+#  The main routine. (This is exactly the same code as in csub.py, except that
+#  the default for nrpt is larger, since the above version of subr() runs much
+#  faster than the more straightforward version used in csub.py).
 
 #  Get the command line arguments, and determine the array size and the number
 #  of times to repeat the subroutine call.
 
 ny = 10
 nx = 2000
-nrpt = 100
+nrpt = 100000
+
 if (len(sys.argv) > 1):
    nrpt = int(sys.argv[1])
    if (len(sys.argv) > 2):
@@ -154,4 +195,14 @@ for iy in range(ny):
          error = True
          break
    if (error) : break
-   
+
+#  -----------------------------------------------------------------------------
+
+#                     P r o g r a m m i n g  N o t e s
+#
+#  o  In practice, the time this takes is generally on a par with the time
+#     taken by the line by line code in csubnp.ps. This is probably connected
+#     with the time to access the additional memory used by the 2D arrays
+#     making up for the code, which has fewer calls to numpy operations and
+#     so would be expected to be faster.
+

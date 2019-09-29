@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-#                              c s u b n p . p y
+#                              c s u b n p v . p y
 #
 #  Summary:
-#     2D array access test in Python, using simple numpy array element access.
+#     2D array access test in Python, using numpy vector operations.
 #
 #  Introduction:
 #     This is a test program written as part of a study into how well different
@@ -21,18 +21,20 @@
 #     study), but it does produce some interesting results.
 #
 #  This version:
-#     This version is for Python, and is a relatively straightforward
-#     implementation, accessing the individual elements of a numpy array
-#     directly using the standard (but fairly inefficient) array[iy,ix] syntax
-#     that numpy supports. This code can be run under Python3 or any version
-#     of Python2 that supports the 'from __future__ import' line at the start
-#     of the code. Note that this is not really how you should be using numpy,
-#     which is designed to provide efficient operations on arrays and vectors,
-#     not on individual array elements.
+#     This version is for Python, and is not really a test of how well Python
+#     handles access to individual elements of an array, but it is an example
+#     of how a Python program can be made more efficient through an imaginative
+#     use of the numpy vector facilities. The code - explained in detail in the
+#     comments to the subr() routine below - achieves the same results as the
+#     much slower but simpler and more straightforward code used in the csub.py
+#     example program, but does it through finding a way of doing this without
+#     needing to access individual array elements directly. This code can be run
+#     under Python3 or any version of Python2 that supports the line at the
+#     start of the code that begins 'from __future__ import'.
 #
 #  Structure:
 #     Most test programs in this study code the basic array manipulation in a
-#     single subrutine, then create the original input array, and pass that,
+#     single subroutine, then create the original input array, and pass that,
 #     together with the dimensions of the array, to that subroutine, repeating
 #     that call a large number of times in oder to be able to get a reasonable
 #     estimate of the time taken. Then the final result is checked against the
@@ -43,15 +45,15 @@
 #     out the call in that case.
 #
 #  Invocation:
-#     ./csubnp.py irpt nx ny
+#     ./csubnpv.py irpt nx ny
 #
 #     or, depending on how Python and/or Python3 have been set up:
 #
-#     python csubnp.py irpt nx ny          or
-#     python3 csubnp.py irpt nx ny
+#     python csubnpv.py irpt nx ny          or
+#     python3 csubnpv.py irpt nx ny
 #
 #     where
-#        irpt  is the number of times the subroutine is called - default 100.
+#        irpt  is the number of times the subroutine is called - default 10000.
 #        nx    is the number of columns in the array tested - default 2000.
 #        ny    is the number of rows in the array tested - default 10.
 #
@@ -62,6 +64,7 @@
 #
 #  History:
 #     20th Aug 2019. First properly commented version. KS.
+#     14th Sep 2019. Corrected index error in subr() when ny >= nx. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -87,7 +90,6 @@
 #  just the use of print() as a function call) when Python2 is being used.
 
 from __future__ import (print_function,division,absolute_import)
-
 import numpy
 import sys
 
@@ -98,25 +100,63 @@ import sys
 #  subr is a subroutine that is passed a two-dimensional floating point array
 #  ina, with dimensions nx by ny, together with a second, output array, out,
 #  of the same dimensions. It returns with each element of out set to the
-#  contents of the corresponding element if ina plus the sum of its two indices.
+#  contents of the corresponding element of ina plus the sum of its two indices.
 #  The intent is to try to see how well any given language handles access to
 #  individual elements of a 2D array,
 
+#  This version of subr() does the same as
+#
+#  def subr(ina,nx,ny,out):
+#     for iy in range(ny):
+#        for ix in range(nx):
+#           out[iy,ix] = ina[iy,ix] + ix + iy
+#  but uses numpy vector operations and is both much faster and much harder to
+#  understand.
+#
+#  In the nx > ny case we set up an array nx long containing [0,1,2,3,...nx-1]
+#  which are the values we want to add to the first cross-section of the array.
+#  This is the array incr. The first time through the loop, we add that to the
+#  first cross section of the array using ina[iy,0:nx] + incr and store it in
+#  the first cross section of the out array. We then increment each element of
+#  incr by 1 (by adding the ones array to it) and do the same for the second
+#  cross section of the passed arrays. This adds [1,2,3,4,...nx] which are the
+#  required ix + iy values for iy = 1, ix going from 0 to nx - 1. And so on.
+#  It's obscure, but it gets the right result using vector operations available
+#  through numpy.
+#
+#  This is fast in the case where nx is much larger than ny, but slow if ny is
+#  much larger than nx. To optimise this, we have two loops, one for each case,
+#  slicing along the longer direction of the array in each case. Numpy handles
+#  the stride between array elements properly to make each case work.
+
 def subr(ina,nx,ny,out):
-   for iy in range(ny):
+   if (nx > ny) :
+      incr = numpy.arange(nx)
+      ones = numpy.array(nx)
+      ones.fill(1)
+      for iy in range(ny):
+         out[iy,0:nx] = ina[iy,0:nx] + incr
+         incr = incr + ones
+   else :
+      incr = numpy.arange(ny)
+      ones = numpy.array(ny)
+      ones.fill(1)
       for ix in range(nx):
-         out[iy,ix] = ina[iy,ix] + ix + iy
+         out[0:ny,ix] = ina[0:ny,ix] + incr
+         incr = incr + ones
 
 #  -----------------------------------------------------------------------------
 
-#  The main routine.
+#  The main routine. (This is exactly the same code as in csub.py, except that
+#  the default for nrpt is larger, since the above version of subr() runs much
+#  faster than the more straightforward version used in csub.py).
 
 #  Get the command line arguments, and determine the array size and the number
 #  of times to repeat the subroutine call.
 
 ny = 10
 nx = 2000
-nrpt = 100
+nrpt = 10000
 if (len(sys.argv) > 1):
    nrpt = int(sys.argv[1])
    if (len(sys.argv) > 2):
@@ -154,4 +194,3 @@ for iy in range(ny):
          error = True
          break
    if (error) : break
-   

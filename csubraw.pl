@@ -1,8 +1,8 @@
-#!/usr/bin/env python
-#                              c s u b n p . p y
+#
+#                          c s u b r a w . p l
 #
 #  Summary:
-#     2D array access test in Python, using simple numpy array element access.
+#     2D array access test in Perl, using standard Perl arrays.
 #
 #  Introduction:
 #     This is a test program written as part of a study into how well different
@@ -21,47 +21,36 @@
 #     study), but it does produce some interesting results.
 #
 #  This version:
-#     This version is for Python, and is a relatively straightforward
-#     implementation, accessing the individual elements of a numpy array
-#     directly using the standard (but fairly inefficient) array[iy,ix] syntax
-#     that numpy supports. This code can be run under Python3 or any version
-#     of Python2 that supports the 'from __future__ import' line at the start
-#     of the code. Note that this is not really how you should be using numpy,
-#     which is designed to provide efficient operations on arrays and vectors,
-#     not on individual array elements.
+#     This version is for Perl, and uses ordinary Perl arrays, accessing each
+#     element using the [$iy][$ix] syntax.
 #
 #  Structure:
 #     Most test programs in this study code the basic array manipulation in a
-#     single subrutine, then create the original input array, and pass that,
+#     single subroutine, then create the original input array, and pass that,
 #     together with the dimensions of the array, to that subroutine, repeating
 #     that call a large number of times in oder to be able to get a reasonable
 #     estimate of the time taken. Then the final result is checked against the
 #     expected result.
 #
 #     This code follows that structure, with both the main routine and the
-#     called subroutine in the same piece of code, as Python doesn't optimise
+#     called subroutine in the same piece of code, as Perl doesn't optimise
 #     out the call in that case.
 #
 #  Invocation:
-#     ./csubnp.py irpt nx ny
-#
-#     or, depending on how Python and/or Python3 have been set up:
-#
-#     python csubnp.py irpt nx ny          or
-#     python3 csubnp.py irpt nx ny
+#     perl csubraw.pl irpt nx ny
 #
 #     where
-#        irpt  is the number of times the subroutine is called - default 100.
+#        irpt  is the number of times the subroutine is called - default 1000.
 #        nx    is the number of columns in the array tested - default 2000.
 #        ny    is the number of rows in the array tested - default 10.
 #
-#     Note that Python uses row-major order, at least by default in numpy;
-#     arrays are stored in memory so that the second index varies fastest.
+#     Note that Perl uses row-major order; arrays are stored in memory so
+#     that the second index varies fastest.
 #
 #  Author(s): Keith Shortridge, Keith@KnaveAndVarlet.com.au
 #
 #  History:
-#     20th Aug 2019. First properly commented version. KS.
+#     15th Sep 2019. First properly commented version. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -83,29 +72,28 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-#  This line provides support for the Python 3 features in the code (mainly
-#  just the use of print() as a function call) when Python2 is being used.
-
-from __future__ import (print_function,division,absolute_import)
-
-import numpy
-import sys
-
 #  --------------------------------------------------------------------------------
 #
-#  The subr() subroutine.
+#  The csub() subroutine.
 #
-#  subr is a subroutine that is passed a two-dimensional floating point array
-#  ina, with dimensions nx by ny, together with a second, output array, out,
-#  of the same dimensions. It returns with each element of out set to the
-#  contents of the corresponding element if ina plus the sum of its two indices.
-#  The intent is to try to see how well any given language handles access to
-#  individual elements of a 2D array,
+#  csub is a subroutine that is passed a two-dimensional floating point array
+#  Input, with dimensions Nx by Ny, together with a second, array, Output,
+#  of the same dimensions. It returns with each element of Output set to the
+#  contents of the corresponding element of Input plus the sum of its two
+#  indices. The intent is to try to see how well any given language handles
+#  access to individual elements of a 2D array,
 
-def subr(ina,nx,ny,out):
-   for iy in range(ny):
-      for ix in range(nx):
-         out[iy,ix] = ina[iy,ix] + ix + iy
+sub csub {
+   my @Input = @{$_[0]};
+   my $Nx = $_[1];
+   my $Ny = $_[2];
+   my @Output = @{$_[3]};
+   for (my $iy=0; $iy < $Ny; $iy++) {
+      for (my $ix=0; $ix < $Nx; $ix++) {
+         $Output[$iy][$ix] = $Input[$iy][$ix] + $ix + $iy;
+      }
+   }
+}
 
 #  -----------------------------------------------------------------------------
 
@@ -114,15 +102,19 @@ def subr(ina,nx,ny,out):
 #  Get the command line arguments, and determine the array size and the number
 #  of times to repeat the subroutine call.
 
-ny = 10
-nx = 2000
-nrpt = 100
-if (len(sys.argv) > 1):
-   nrpt = int(sys.argv[1])
-   if (len(sys.argv) > 2):
-      nx = int(sys.argv[2])
-      if (len(sys.argv) > 3):
-         ny = int(sys.argv[3])
+$nx = 2000;
+$ny = 10;
+$nrpt = 3;
+if ($#ARGV >= 0) {
+   $nrpt = $ARGV[0];
+   if ($#ARGV >= 1) {
+      $nx = $ARGV[1];
+      if ($#ARGV >= 2) {
+         $ny = $ARGV[2];
+      }
+   }
+}
+print ("Arrays ",$nx," columns by ",$ny," rows, repeats = ",$nrpt,"\n");
 
 #  Create the input array and output arrays. We set the elements of the input
 #  array to some set of values - it doesn't matter what, just some values we
@@ -130,28 +122,33 @@ if (len(sys.argv) > 1):
 #  column indices in descending order. The values in the output array don't
 #  matter, so we fill it with zeros.
 
-ina = numpy.zeros((ny,nx))
-for iy in range(ny):
-   for ix in range(nx):
-      ina[iy,ix] = nx - ix + ny - iy
-
-out = numpy.zeros((ny,nx))
-
-print ("Arrays",nx,"by",ny,"count",nrpt)
+my @InArray;
+my @OutArray;
+$InArray[$ny][$nx] = 0.0;
+$OutArray[$ny][$nx] = 0.0;
+for (my $iy=0; $iy < $ny; $iy++) {
+   for (my $ix=0; $ix < $nx; $ix++) {
+      $InArray[$iy][$ix] = $nx - $iy + $ny - $ix;
+      $OutArray[$iy][$ix] = 0.0;
+   }
+}
 
 #  Call the subroutine the specified number of times.
 
-for irpt in range(nrpt):
-   subr(ina,nx,ny,out)
+for (my $irpt = 0; $irpt < $nrpt; $irpt++) {
+   csub (\@InArray,$nx,$ny,\@OutArray);
+}
 
 #  Check the results.
 
-error = False
-for iy in range(ny):
-   for ix in range(nx):
-      if (out[iy,ix] != (ina[iy,ix] + (ix + iy))):
-         print ("Error: ",out[iy,ix],ix,iy,ina[iy,ix])
-         error = True
-         break
-   if (error) : break
-   
+Loop: {
+   for (my $iy=0; $iy < $ny; $iy++) {
+      for (my $ix=0; $ix < $nx; $ix++) {
+         if ($OutArray[$iy][$ix] != $InArray[$iy][$ix] + $ix + $iy) {
+            print "Error ",$ix," ",$iy," ",
+                        $InArray[$iy][$ix]," ",$OutArray[$iy][$ix],"\n";
+            last Loop;
+         }
+      }
+   }
+}

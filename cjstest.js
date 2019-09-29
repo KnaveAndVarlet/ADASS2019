@@ -142,13 +142,11 @@ for (var loop = 0; loop < nrpt; loop++) subr(inp,nx,ny,out);
 
 //  Check that we got the expected results.
 
-var Error = false;
 TestLoop:
    for (var iy = 0; iy < ny; iy++) {
       for (var ix = 0; ix < nx; ix++) {
          if (out[iy][ix] != (inp[iy][ix] + ix + iy)) {
             console.log("Error:",out[iy][ix],iy,ix,inp[iy][ix]);
-            Error = true;
             break TestLoop;
          }
       }

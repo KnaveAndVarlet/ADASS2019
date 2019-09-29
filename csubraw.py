@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-#                              c s u b n p . p y
+#                              c s u b r a w . p y
 #
 #  Summary:
-#     2D array access test in Python, using simple numpy array element access.
+#     2D array access test in Python, using arrays formed from lists of lists.
 #
 #  Introduction:
 #     This is a test program written as part of a study into how well different
@@ -21,14 +21,12 @@
 #     study), but it does produce some interesting results.
 #
 #  This version:
-#     This version is for Python, and is a relatively straightforward
-#     implementation, accessing the individual elements of a numpy array
-#     directly using the standard (but fairly inefficient) array[iy,ix] syntax
-#     that numpy supports. This code can be run under Python3 or any version
-#     of Python2 that supports the 'from __future__ import' line at the start
-#     of the code. Note that this is not really how you should be using numpy,
-#     which is designed to provide efficient operations on arrays and vectors,
-#     not on individual array elements.
+#     This version is for Python, and is a very straightforward
+#     implementation, accessing the individual elements of a simple Python
+#     array directly using the standard array[iy][ix] syntax. The array is
+#     actually a list of lists. Note that this is not using numpy. This code
+#     can be run under Python3 or any version of Python2 that supports the
+#     'from __future__ import' line at the start of the code.
 #
 #  Structure:
 #     Most test programs in this study code the basic array manipulation in a
@@ -43,25 +41,25 @@
 #     out the call in that case.
 #
 #  Invocation:
-#     ./csubnp.py irpt nx ny
+#     ./csubraw.py irpt nx ny
 #
 #     or, depending on how Python and/or Python3 have been set up:
 #
-#     python csubnp.py irpt nx ny          or
-#     python3 csubnp.py irpt nx ny
+#     python csubraw.py irpt nx ny          or
+#     python3 csubraw.py irpt nx ny
 #
 #     where
-#        irpt  is the number of times the subroutine is called - default 100.
+#        irpt  is the number of times the subroutine is called - default 1000.
 #        nx    is the number of columns in the array tested - default 2000.
 #        ny    is the number of rows in the array tested - default 10.
 #
-#     Note that Python uses row-major order, at least by default in numpy;
-#     arrays are stored in memory so that the second index varies fastest.
+#     Note that Python uses row-major order; arrays are stored in memory so
+#     that the second index varies fastest.
 #
 #  Author(s): Keith Shortridge, Keith@KnaveAndVarlet.com.au
 #
 #  History:
-#     20th Aug 2019. First properly commented version. KS.
+#     15th Sep 2019. First properly commented version. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -88,7 +86,6 @@
 
 from __future__ import (print_function,division,absolute_import)
 
-import numpy
 import sys
 
 #  --------------------------------------------------------------------------------
@@ -105,7 +102,7 @@ import sys
 def subr(ina,nx,ny,out):
    for iy in range(ny):
       for ix in range(nx):
-         out[iy,ix] = ina[iy,ix] + ix + iy
+         out[iy][ix] = ina[iy][ix] + ix + iy
 
 #  -----------------------------------------------------------------------------
 
@@ -128,14 +125,15 @@ if (len(sys.argv) > 1):
 #  array to some set of values - it doesn't matter what, just some values we
 #  can use to check the array manipulation on. This uses the sum of the row and
 #  column indices in descending order. The values in the output array don't
-#  matter, so we fill it with zeros.
+#  matter, so we fill it with zeros. The 'arrays' are actually lists of lists,
+#  set up using 'list comprehension'.
 
-ina = numpy.zeros((ny,nx))
+ina = [[0.0] * nx for i in range(ny)]
 for iy in range(ny):
    for ix in range(nx):
-      ina[iy,ix] = nx - ix + ny - iy
+      ina[iy][ix] = nx - ix + ny - iy
 
-out = numpy.zeros((ny,nx))
+out = [[0.0] * nx for i in range(ny)]
 
 print ("Arrays",nx,"by",ny,"count",nrpt)
 
@@ -149,8 +147,8 @@ for irpt in range(nrpt):
 error = False
 for iy in range(ny):
    for ix in range(nx):
-      if (out[iy,ix] != (ina[iy,ix] + (ix + iy))):
-         print ("Error: ",out[iy,ix],ix,iy,ina[iy,ix])
+      if (out[iy][ix] != (ina[iy][ix] + (ix + iy))):
+         print ("Error: ",out[iy][ix],ix,iy,ina[iy][ix])
          error = True
          break
    if (error) : break
