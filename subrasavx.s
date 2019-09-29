@@ -46,7 +46,8 @@
 #  Author(s): Keith Shortridge, Keith@KnaveAndVarlet.com.au
 #
 #  History:
-#     2nd Jul 2019. First properly commented version. KS.
+#      2nd Jul 2019. First properly commented version. KS.
+#     29th Sep 2019. Fixed one confusing constant name. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -175,7 +176,7 @@ __Z4subrPPfiiS0_:
    #        value for the start of each line are saved in %ymm3.)
 
    vmovdqa       ZeroThroughEight(%rip),%ymm2
-   vpbroadcastd  Eight(%rip),%ymm7
+   vpbroadcastd  Ones(%rip),%ymm7
    vpbroadcastd  ThirtyTwo(%rip),%ymm8
    vbroadcastss  FloatEight(%rip),%ymm6
 
@@ -354,7 +355,7 @@ ZeroThroughEight:
    .long    6
    .long    7
 
-Eight:
+Ones:
    .long    1
 
 ThirtyTwo:
