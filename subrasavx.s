@@ -48,7 +48,8 @@
 #  History:
 #      2nd Jul 2019. First properly commented version. KS.
 #     29th Sep 2019. Fixed one confusing constant name. KS.
-#     30th Sep 2019. Fixed bug that showed up for values of Nx less than 32. KS.
+#     30th Sep 2019. Fixed bug that showed up for values of Nx less than 32.
+#                    Revised some out of date comments. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -86,7 +87,7 @@
 #   The AVX vector instructions defined for X86_64 can handle eight 32-bit
 #   floating point data values at a time. For the first row (Iy=0), the first
 #   set of numbers added to the first eight data elements are (0,1,2,..7) and
-#   once those have been done, the values added to the next four are (8,9,10,
+#   once those have been done, the values added to the next eight are (8,9,10,
 #   ..15) - which are each (4,4,4,4,4,4,4,4) more than the values added to the
 #   previous eight. This allows a very efficient vector loop through that line.
 #
@@ -226,7 +227,7 @@ IyLoop:
    #         this will eventually provide the starting values for the next line.
    #  %ymm6  contains eight floating point values each 8.0.
    #         Note that if you add %ymm6 to %ymm2 you get the values to be
-   #         added to the next four elements.
+   #         added to the next eight elements.
    #  %rdi   is the address of In[Iy]
    #         On exit, this will be the address of In[Iy][Nx - Nextra]
    #  %r11   holds the address contained in In[Iy], that is the address of
@@ -240,12 +241,12 @@ IyLoop:
    #  %r8    contains the address of In[Ix][Nx - Nextra] - ie the address
    #         of the element following those we handle in this loop.
    #
-   #  An original version of the fast loop only handled one group of four
+   #  An original version of the fast loop only handled one group of eight
    #  elements. However, it turns out to be noticeably faster to handle
    #  more elements than this before taking the test and branch overheads of
-   #  the loop. Doing two groups of four gives a significant improvement,
-   #  doubling that to four groups of four provides a slight improvement, and
-   #  then it diminishing returns - the code gets longer and messier, and
+   #  the loop. Doing two groups of eight gives a significant improvement,
+   #  doubling that to four groups of eight provides a slight improvement, and
+   #  then it's diminishing returns - the code gets longer and messier, and
    #  the extra loop will have to handle more and more elements.
    #
    #  As we go through the fast loop:
@@ -409,3 +410,10 @@ FloatEight:
 #  o  In fact, most of what this exercise demonstrates is that it's really
 #     hard to beat - or even draw with - a modern optimising compiler so long
 #     as it's given the right optimisation flags.
+#
+#  o  This code originally used the 128-bit xmm registers to handle the main
+#     loop through a row in four groups of four elements. It was revised to
+#     use the 256-bit ymm registers and work in four groups of eight elements.
+#     I believe I've fixed up all the comments to reflect this, but there may
+#     still be the odd reference to four that should be eight. I seem to keep
+#     finding these.
