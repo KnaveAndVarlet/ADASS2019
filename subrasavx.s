@@ -48,6 +48,7 @@
 #  History:
 #      2nd Jul 2019. First properly commented version. KS.
 #     29th Sep 2019. Fixed one confusing constant name. KS.
+#     30th Sep 2019. Fixed bug that showed up for values of Nx less than 32. KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -141,10 +142,10 @@ __Z4subrPPfiiS0_:
    #  This code has three loops. There is an overall loop through the
    #  lines of the input array, that is from Iy = 0 to Iy = Ny - 1.
    #  Each time through that loop, we handle a line of the input array.
-   #  We have a very efficient loop through the elements of that line,
-   #  which handles the elements sixteen at a time, in four groups of four,
-   #  using the 128 bit xmm registers. If the number of elements in a line
-   #  (Nx) is not a multiple of 16, then an extra loop is needed to go
+   #  We have a very efficient loop through the elements of that line, which
+   #  handles the elements thirty two at a time, in four groups of eight,
+   #  using the 256 bit ymm registers. If the number of elements in a line
+   #  (Nx) is not a multiple of 32, then an extra loop is needed to go
    #  through those extra elements.
    
    testl    %esi,%esi      # Is Nx zero or negative?
@@ -152,7 +153,7 @@ __Z4subrPPfiiS0_:
    testl    %edx,%edx      # Similarly for Ny.
    jle      Return
    
-   #  Some initial values.
+   #  Some initial values:
    #  %ymm2 starts by holding the eight integers 0,1,2,..,7. These are the
    #        values that will be added to the elements at the start of the very
    #        first line, that is, they are the values of Ix+Iy when Iy = 0 for
@@ -174,6 +175,12 @@ __Z4subrPPfiiS0_:
    #        one more than for the start of the the previous line - since Iy has
    #        gone up by one as you move from one line to the next. (Those initial
    #        value for the start of each line are saved in %ymm3.)
+   #  Note: %rip is the instruction pointer, holding the address of the next
+   #  instruction. For something like Ones(%rip), the assembler calculates
+   #  the offset from the next instruction to the address of Ones, and when
+   #  this executes that offset is added to %rip to produce position
+   #  independent code. The 'broadcast' instructions replicate a single value
+   #  to fill all 8 elements of a ymm register.
 
    vmovdqa       ZeroThroughEight(%rip),%ymm2
    vpbroadcastd  Ones(%rip),%ymm7
@@ -183,7 +190,7 @@ __Z4subrPPfiiS0_:
    xorq     %r10,%r10      # Iy (index through IyLoop) = 0.
    movq     %rsi,%r9       # Nx (rsi is the 64-bit whole of esi, so holds Nx).
    movq     %r9,%r12       # r12 is Nextra - the number of elements we can't
-   andq     $8,%r12        # handle in the fast IxLoop. Nextra = Nx & 0x10
+   andq     $31,%r12       # handle in the fast IxLoop. Nextra = Nx & 31
    subq     %r12,%r9       # r9 is now Nx - Nextra
    shlq     $2,%r9         # (Nx - Nextra) * 4 (Bytes in the part of the line we
                            # will handle in the fast IxLoop.)
@@ -256,8 +263,8 @@ IyLoop:
    #   Using this many vector registers is over the top, but it does allow
    #   easy experimentation. It makes it easy to move the calculation of
    #   increments (the register-based vaddps instructions) and the 'load and
-   #   add' (vaddps) instructions, and the store instructions to see if any
-   #   reorganisation improves the speed, perhaps by allowing memory I/O to
+   #   add' (also vaddps) instructions, and the store instructions to see if
+   #   any reorganisation improves the speed, perhaps by allowing memory I/O to
    #   overlap with other things. (Spoiler - it really doesn't seem to make
    #   much difference, although the sequence here of precalculating the
    #   increments, then two load and adds, two stores, two load and adds, two
