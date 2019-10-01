@@ -23,7 +23,7 @@
 //    This version is for Javascript. Like C, Javascript does not support mult-
 //    dimensional arrays as a specific type. It does support arrays of arrays,
 //    and it is possible to set up a 2D array in this way. The result is not
-//    unlike the scheme used in 'Numerical Recipies in C' - what looks like a
+//    unlike the scheme used in 'Numerical Recipes in C' - what looks like a
 //    2D array is actually an array of 1D arrays, but the Array[Iy][Ix] syntax
 //    works nicely and is arguably easier to set up than in C++.
 //

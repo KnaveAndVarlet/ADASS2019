@@ -30,7 +30,7 @@
 //    a subroutine and allow the code in the subroutine to do the same. There
 //    are a number of ways around this, and this main routine uses an
 //    ArrayManager class that packages up the method popularised in the book
-//    'Numerical Recipies in C', where what is passed to the subroutine is the
+//    'Numerical Recipes in C', where what is passed to the subroutine is the
 //    address of an array whose elements contain the addresses of the start of
 //    each row of the 2D array. This allows the called routine to refer to
 //    elements of the 2D array using the convenient Array[Iy][Ix] form. The
@@ -54,10 +54,10 @@
 //    array. The main routine and the subroutine have to be in different files
 //    and compiled separately, or at high levels of optimisation a C++ compiler
 //    may realise that it can optimise out the entire subroutine. The subroutine
-//    must have been written to suit the Numerical Recipies way of handling
+//    must have been written to suit the Numerical Recipes way of handling
 //    arrays, such as the code in nrsub.cpp, which works just the same with
 //    this test routine as it does with cnrmain.cpp - which isn't surprising, as
-//    both are implementing the same Numerical Recipies scheme.
+//    both are implementing the same Numerical Recipes scheme.
 //
 // Building:
 //    The file containing the implementation of the subr() routine has to be

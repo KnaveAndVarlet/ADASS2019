@@ -205,9 +205,9 @@ int main (int argc, char* argv[])
      to be able to use a more convenient syntax in the called subroutine, but
      they need a little more infrastructure. Examples can be found in the other
      C++ routines available as part of this set of test routines:
-     cnrmain.cpp/cnrsub.cpp use a scheme found in Numerical Recipies in C.
+     cnrmain.cpp/cnrsub.cpp use a scheme found in Numerical Recipes in C.
      cbmain.cpp/cbsub.cpp use the Boost libraries for array access.
-     ckmain.cpp/cksub.cpp use a class that implements the Numerical Recipies
+     ckmain.cpp/cksub.cpp use a class that implements the Numerical Recipes
      scheme.
 
 */

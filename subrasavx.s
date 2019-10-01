@@ -20,7 +20,7 @@
 #   In and Out are assumed to be the addresses of two arrays that hold the
 #   addresses of the start of the lines (rows) of two 2D arrays. This is the
 #   way access to a 2D array is set up using the scheme in, for example,
-#   Numerical Recipies in C. Each of the In and Out arrays will have Ny
+#   Numerical Recipes in C. Each of the In and Out arrays will have Ny
 #   elements (Ny being the number of rows in the 2D array), and each row
 #   will have Nx elements (Nx being the length of each row, ie the number of
 #   columns in the array), In practice, when 2D arrays are accessed in this

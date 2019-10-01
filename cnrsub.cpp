@@ -2,7 +2,7 @@
 //                           c n r s u b . c p p
 //
 // Summary:
-//    2D array access test subroutine in C++, 'Numerical Methods' array access.
+//    2D array access test subroutine in C++, 'Numerical Recipes' array access.
 //
 // Introduction:
 //    This is a test routine written as part of a study into how well different
@@ -16,7 +16,7 @@
 //    compiled using different compilers, or using different options.
 //
 // This version:
-//    This version is for C++, and assumes the use of the 'Numerical Recipies'
+//    This version is for C++, and assumes the use of the 'Numerical Recipes'
 //    scheme for passing multi-dimensional arrays to subroutines. In this case,
 //    both In and Out are not the actual 2D arrays, but are arrays of pointers
 //    to the rows of those arrays. This allows elements to be accessed simply
@@ -24,7 +24,7 @@
 //    the main test program in cnrmain.cpp. See the comments in that code for
 //    more details. (It may be worth noting that it can also work with the test
 //    code in ckmain.cpp, as the ArrayManager code used by that program is
-//    simply a packaging up of the Numerical Recipies scheme.)
+//    simply a packaging up of the Numerical Recipes scheme.)
 //
 //    Note that C/C++ use row-major order; arrays are stored in memory so that
 //    the second index varies fastest. We want the array to be stored so that

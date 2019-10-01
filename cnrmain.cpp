@@ -2,7 +2,7 @@
 //                           c n r m a i n . c p p
 //
 // Summary:
-//    2D array access test main routine in C++, 'Numerical Recipies' arrays.
+//    2D array access test main routine in C++, 'Numerical Recipes' arrays.
 //
 // Introduction:
 //    This is a test program written as part of a study into how well different
@@ -55,7 +55,7 @@
 //    array. The main routine and the subroutine have to be in different files
 //    and compiled separately, or at high levels of optimisation a C++ compiler
 //    may realise that it can optimise out the entire subroutine. The subroutine
-//    must have been written to suit the Numerical Recipies way of handling
+//    must have been written to suit the Numerical Recipes way of handling
 //    arrays, such as the code in the matching cnrsub.cpp.
 //
 // Building:
