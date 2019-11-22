@@ -1,8 +1,8 @@
 //
-//                           c r s m a i n . r s
+//                       c r s m a i n _ u n s a f e . r s
 //
 // Summary:
-//    2D array access test main routine in Rust.
+//    2D array access test main routine in Rust, using unsafe code.
 //
 // Introduction:
 //    This is a test program written as part of a study into how well different
@@ -22,10 +22,14 @@
 //
 // This version:
 //    This version is for Rust. Rust supports multi-dimensional 'rectangular'
-//    arrays as vectors of vectors, which can produce the same effect.
+//    arrays as vectors of vectors, which can produce the same effect.  The
+//    version of the csub() routine that does the main array manipulations
+//    called by this version of the code (the version in crssub_unsafe.rs) uses
+//    an 'unsafe' block of code to access the array elements with as little
+//    overhead as possible.
 //
 // Structure:
-//    Most test programs in this study code the basic array manipulation in a
+//    Most test progrsms in this study code the basic array manipulation in a
 //    single subroutine, then create the original input array, and pass that,
 //    together with the dimensions of the array, to that subroutine, repeating
 //    that call a large number of times in oder to be able to get a reasonable
@@ -38,15 +42,15 @@
 //    the actual work of setting the required values in the output array.
 //
 // Building:
-//    It is enough to pass this one source file, crsmain.rs to the Rust
+//    It is enough to pass this one source file, crsmain_unsafe.rs to the Rust
 //    rustc compiler. It will automatically pick up the code for the crssub
-//    module from a separate source file, crssub.rs, eg:
+//    module from a separate source file, crssub_unsafe.rs, eg:
 //
-//    rustc crsmain.rs         or, for optimised code:
-//    rustc -O -C target-cpu=native -C opt-level=3 crsmain.rs
+//    rustc crsmain_unsafe.rs         or, for optimised code:
+//    rustc -O -C target-cpu=native -C opt-level=3 crsmain_unsafe.rs
 //
 // Invocation:
-//    ./crsmain irpt nx ny
+//    ./crsmain_unsafe irpt nx ny
 //
 //    where:
 //      irpt  is the number of times the subroutine is called - default 100000.
@@ -61,9 +65,7 @@
 // Author(s): Keith Shortridge, Keith@KnaveAndVarlet.com.au
 //
 // History:
-//    13th Sep 2019. First properly commented version. KS.
-//    28th Oct 2019. Corrected code so defaults for irpt, nx and ny match those
-//                   in the description, ie 100000, 2000 and 10. KS.
+//    28th Oct 2019. Original version, a trivial change to crsmain.rs. KS.
 //
 // Copyright (c) 2019 Knave and Varlet
 //
@@ -87,7 +89,7 @@
 
 use std::env;
 
-mod crssub;
+mod crssub_unsafe;
 
 //  ----------------------------------------------------------------------------
 //
@@ -145,7 +147,7 @@ fn main() {
    //  Repeat the call to the manipulating subroutine.
 
    for _irpt in 1..=nrpt {
-      crssub::csub (&in_array,nx,ny,&mut out_array);
+      crssub_unsafe::csub (&in_array,nx,ny,&mut out_array);
    }
 
    //  Check that we got the expected results.
@@ -167,15 +169,16 @@ fn main() {
 
                   P r o g r a m m i n g   N o t e s
 
-   o The code checks that the command line arguments are valid numbers, but
-     doesn't check that they're not zero. It is only a test routine. It only
-     checks they're valid numbers because I was trying to understand the
-     way to do that, using match to check the parse() result.
+   o This code is identical to that in crsmain.rs, the calling routine for
+     the rust version of this code that uses simple array indexes, eg
+     array[iy][ix] to access the data, except that it uses a version of
+     csub() in a module called crssub_unsafe instead of one in crssub. Since as
+     far as I can see rust actually inlines the code anyway, there doesn't
+     seem to be much point in having the rust code split into two source
+     files, but this was a simple change to test a different version of the
+     subroutine. (The test code in this file still uses the slower array[iy][ix]
+     form to access the arrays - the time this takes doesn't matter, as it only
+     runs once.)
 
-   o The code can be made to run faster by using a 1D array and doing the
-     index calculations in the code, but that seems to defeat the point of
-     this test. (Indeed, I've seen comments that suggest this as the best
-     way to speed up 2D array access in Rust. Perhaps this will change as
-     the compiler matures, as it did with Swift.)
 
 */

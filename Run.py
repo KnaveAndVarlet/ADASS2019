@@ -45,6 +45,14 @@
 #                    All tests now have a single baseline run with one
 #                    repeat to try to allow for startup and checking
 #                    overheads. KS.
+#     24th Oct 2019. Added the tests Python3npNumba (which uses the numba jit
+#                    compiler to speed up the raw numpy array test) and
+#                    JuliaInt32 which tweaks the Julia code to get up to C++
+#                    speeds. KS.
+#     29th Oct 2019. Added the tests RustO3nativeIter and RustO3nativeUnsafe,
+#                    which represent more efficient ways of coding the test
+#                    program in Rust (using iterators and 'unsafe', ie unchecked
+#                    access, respectively). KS.
 #
 #  Copyright (c) 2019 Knave and Varlet
 #
@@ -954,6 +962,15 @@ JuliaO3 = [
    200000,
    ""]
 
+JuliaInt32 = [
+   "Julia",
+   "julia (int32)",
+   "",
+   "",
+   "julia -O3 csubint32nb.jl",
+   5000000,
+   ""]
+
 RawR = [
    "R : raw",
    "Rscript",
@@ -1089,6 +1106,15 @@ Python3ary = [
    50000,
    ""]
 
+Python3npNumba = [
+   "Python : numpy raw",
+   "Python3 numba",
+   "",
+   "",
+   "python3 csubnp-numba.py",
+   500000,
+   ""]
+
 Rust = [
    "Rust",
    "Rustc",
@@ -1124,6 +1150,24 @@ RustO3native = [
    "./crsmain",
    100000,
    "rm -f crsmain"]
+
+RustO3nativeIter = [
+   "Rust",
+   "Rustc iterators",
+   "rustc -C target-cpu=native -C opt-level=3 crsmain_iter.rs ",
+   "",
+   "./crsmain_iter",
+   100000,
+   "rm -f crsmain_iter"]
+
+RustO3nativeUnsafe = [
+   "Rust",
+   "Rustc unsafe",
+   "rustc -C target-cpu=native -C opt-level=3 crsmain_unsafe.rs ",
+   "",
+   "./crsmain_unsafe",
+   300000,
+   "rm -f crsmain_unsafe"]
 
 Javascript = [
    "Javascript",
@@ -1190,10 +1234,12 @@ FullTests = [
    Perl,PerlPDLraw,PerlPDLvec,PerlPDLary,
    Python2,Python2np,Python2vec,Python2ary,
    Python3,Python3np,Python3vec,Python3ary,
+   Python3npNumba,
    Rust,RustO,RustO3,RustO3native,
+   RustO3nativeIter,RustO3nativeUnsafe,
    Java,
    Tcl,
-   Julia,JuliaO0,JuliaO1,JuliaO2,JuliaO3,
+   Julia,JuliaO0,JuliaO1,JuliaO2,JuliaO3,JuliaInt32,
    Javascript,JavascriptNoopt,
    RawCclang,RawCclangO,RawCclangO1,RawCclangO2,RawCclangO3,RawCclangO3native,
    RawCgcc,RawCgccO,RawCgccO1,RawCgccO2,RawCgccO3,RawCgccO3native,
